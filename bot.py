@@ -7,6 +7,7 @@ RADIO_URL = os.getenv("RADIO_URL")
 intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
+
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
@@ -29,12 +30,14 @@ async def join(ctx):
         vc.play(src)
         await ctx.send(f"✅ شغال الآن في {ch.name} 📻")
     except Exception as e:
-        await ctx.send(f"❌ {e}")
-        print(e)
+        await ctx.send(f"❌ خطأ: {e}")
+        print(f"ERROR: {e}")
 
 @bot.command()
 async def leave(ctx):
     if ctx.voice_client:
         await ctx.voice_client.disconnect(force=True)
+        await ctx.send("👋 طلعت")
 
 bot.run(TOKEN)
+
