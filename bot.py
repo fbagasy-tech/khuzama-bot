@@ -2,7 +2,8 @@ import discord, os, asyncio
 from discord.ext import commands
 
 TOKEN = os.getenv("DISCORD_TOKEN") or os.getenv("TOKEN")
-RADIO_URL = os.getenv("RADIO_URL", "https://spring-butterfly-de76.fbagasy.workers.dev/?stream=https%3A%2F%2Fsba-radio-live1.sba.gov.sa%3A8443%2FkhuzamaRadio%2FkhuzamaRadio.m3u8")
+# الرابط المباشر بدون بروكسي
+RADIO_URL = "https://sba-radio-live1.sba.gov.sa:8443/khuzamaRadio/khuzamaRadio.m3u8"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -25,12 +26,17 @@ async def join(ctx):
         await asyncio.sleep(1)
     try:
         vc = await channel.connect(self_deaf=False, self_mute=False, timeout=30)
-        await asyncio.sleep(2)
-        audio = discord.FFmpegOpusAudio(RADIO_URL, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", options="-vn")
-        vc.play(audio)
+        await asyncio.sleep(1)
+        
+        # مهم: whitelist للـ https
+        before = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -protocol_whitelist file,http,https,tcp,tls,crypto"
+        source = discord.FFmpegPCMAudio(RADIO_URL, before_options=before, options="-vn")
+        
+        vc.play(source)
         await ctx.send(f"✅ شغلت إذاعة خزامى في {channel.name} 📻")
     except Exception as e:
         await ctx.send(f"❌ خطأ: {e}")
+        print(f"ERROR JOIN: {e}")
 
 @bot.command()
 async def leave(ctx):
